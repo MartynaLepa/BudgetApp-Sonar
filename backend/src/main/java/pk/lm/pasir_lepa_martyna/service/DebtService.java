@@ -16,6 +16,8 @@ import java.util.List;
 @Service
 public class DebtService {
 
+    private static final String NOT_FOUND = " nie istnieje.";
+
     private final DebtRepository debtRepository;
     private final GroupRepository groupRepository;
     private final UserRepository userRepository;
@@ -42,13 +44,13 @@ public class DebtService {
     public Debt createDebt(DebtDTO debtDTO) {
         Group group = groupRepository.findById(debtDTO.getGroupId())
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Nie można utworzyć długu. Grupa o ID " + debtDTO.getGroupId() + " nie istnieje."));
+                        "Nie można utworzyć długu. Grupa o ID " + debtDTO.getGroupId() + NOT_FOUND));
         User debtor = userRepository.findById(debtDTO.getDebtorId())
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Nie można utworzyć długu. Dłużnik o ID " + debtDTO.getDebtorId() + " nie istnieje."));
+                        "Nie można utworzyć długu. Dłużnik o ID " + debtDTO.getDebtorId() + NOT_FOUND));
         User creditor = userRepository.findById(debtDTO.getCreditorId())
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Nie można utworzyć długu. Wierzyciel o ID " + debtDTO.getCreditorId() + " nie istnieje."));
+                        "Nie można utworzyć długu. Wierzyciel o ID " + debtDTO.getCreditorId() + NOT_FOUND));
 
         membershipService.assertCurrentUserIsGroupMember(group.getId());
         membershipService.assertUserIsGroupMember(group.getId(), debtor.getId());
@@ -73,7 +75,7 @@ public class DebtService {
     public void deleteDebt(Long debtId) {
         Debt debt = debtRepository.findById(debtId)
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Nie można usunąć długu. Dług o ID " + debtId + " nie istnieje."));
+                        "Nie można usunąć długu. Dług o ID " + debtId + NOT_FOUND));
         membershipService.assertCurrentUserIsGroupMember(debt.getGroup().getId());
         User currentUser = currentUserService.getCurrentUser();
         assertCurrentUserCanManageDebt(debt.getGroup(), debt.getDebtor(), debt.getCreditor(), currentUser);
