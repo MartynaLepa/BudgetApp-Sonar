@@ -31,7 +31,7 @@ table {
     padding: 1rem;
     border-bottom: 1px solid color.adjust($background-color, $lightness: -15%);
     text-align: left;
-    white-space: nowrap; // Zapobiega zawijaniu się tekstu
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
@@ -77,7 +77,6 @@ table {
   margin-bottom: 0.5rem;
 }
 
-// Poprawiona stylizacja akcji (przycisków edycji, usuwania itp.)
 .actions {
   display: flex;
   gap: 0.5rem;
@@ -119,11 +118,11 @@ table {
 
 .cancel {
   @extend .button;
-  background-color: gray;
+  background-color: #6b6b6b;
   color: white;
 
   &:hover {
-    background-color: darkgray;
+    background-color: #5a5a5a;
   }
 }
 
@@ -137,7 +136,6 @@ table {
   }
 }
 
-// Stylizacja modalnego okna usuwania transakcji
 .modal {
   position: fixed;
   top: 0;
