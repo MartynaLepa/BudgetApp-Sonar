@@ -1,76 +1,29 @@
-import { useMemo, useState, type FormEvent } from "react";
+import React, { useState } from "react";
 import { Id, groupsApi } from "../../api/groupsApi";
-import { useBalance } from "../../components/BalanceBar/useBalance";
-import { useAuth } from "../../context/AuthContext";
 import styles from "./Group.module.scss";
-
-interface Member {
-  id: Id;
-  userId: Id;
-  groupId: Id;
-  userEmail: string;
-}
 
 interface Props {
   groupId: Id;
-  members: Member[];
   onTransactionAdded: () => void;
 }
 
-const AddGroupTransaction = ({
-  groupId,
-  members,
-  onTransactionAdded,
-}: Props) => {
-  const { user } = useAuth();
-  const { refreshBalance } = useBalance();
+const AddGroupTransaction: React.FC<Props> = ({ groupId, onTransactionAdded }) => {
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
   const [type, setType] = useState<"EXPENSE" | "INCOME">("EXPENSE");
-  const [selectedUserIds, setSelectedUserIds] = useState<Id[]>([]);
-  const [hasCustomParticipants, setHasCustomParticipants] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const currentUserId = user?.id !== undefined ? String(user.id) : "";
-
-  const memberIds = useMemo(() => members.map((member) => member.userId), [members]);
-  
-  // Poprawiony warunek - prosty i czysty, bez zaprzeczeń
-  const effectiveSelectedUserIds = useMemo(() => {
-    if (hasCustomParticipants) {
-      const existingMemberIds = new Set(memberIds.map(String));
-      return selectedUserIds.filter((id) => existingMemberIds.has(String(id)));
-    }
-    return memberIds;
-  }, [hasCustomParticipants, memberIds, selectedUserIds]);
 
   const getErrorMessage = (error: unknown, fallback: string) => {
     if (error instanceof Error && error.message.trim()) {
       return error.message.replace(/^Wystąpił błąd:\s*/i, "");
     }
+
     return fallback;
   };
 
-  // Naprawiono logikę: Najpierw pobieramy aktualną listę na podstawie STAREGO stanu,
-  // a dopiero potem przestawiamy flagę `setHasCustomParticipants(true)`
-  const toggleUserSelection = (userId: Id) => {
-    const currentList = hasCustomParticipants ? selectedUserIds : memberIds;
-    const isSelected = currentList.some((id) => String(id) === String(userId));
-
-    if (isSelected) {
-      setSelectedUserIds(currentList.filter((id) => String(id) !== String(userId)));
-    } else {
-      setSelectedUserIds([...currentList, userId]);
-    }
-    
-    setHasCustomParticipants(true);
-  };
-
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsedAmount = Number(amount);
-    const uniqueSelectedUserIds = Array.from(
-      new Map(effectiveSelectedUserIds.map((id) => [String(id), id])).values()
-    );
 
     if (!title.trim()) {
       setErrorMessage("Podaj tytuł transakcji.");
@@ -82,32 +35,13 @@ const AddGroupTransaction = ({
       return;
     }
 
-    if (uniqueSelectedUserIds.length < 2) {
-      setErrorMessage("Wybierz co najmniej dwóch uczestników transakcji.");
-      return;
-    }
-
-    if (!uniqueSelectedUserIds.some((id) => String(id) === currentUserId)) {
-      setErrorMessage("Musisz być uczestnikiem transakcji grupowej.");
-      return;
-    }
-
     try {
       setErrorMessage("");
-      await groupsApi.addGroupTransaction(
-        groupId,
-        parsedAmount,
-        type,
-        title.trim(),
-        uniqueSelectedUserIds
-      );
+      await groupsApi.addGroupTransaction(groupId, parsedAmount, type, title.trim());
       setTitle("");
       setAmount("");
       setType("EXPENSE");
-      setSelectedUserIds([]);
-      setHasCustomParticipants(false);
       onTransactionAdded();
-      refreshBalance(null);
     } catch (error: unknown) {
       console.error("Błąd dodawania transakcji grupowej:", error);
       setErrorMessage(
@@ -116,11 +50,9 @@ const AddGroupTransaction = ({
     }
   };
 
-  const transactionTypeLabel = type === "EXPENSE" ? "wydatek" : "przychód";
-
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
-      <h3>Dodaj nowy {transactionTypeLabel}</h3>
+      <h3>Dodaj nowy {type === "EXPENSE" ? "wydatek" : "przychód"}</h3>
       <div className={styles.formsContainer}>
         <input
           type="text"
@@ -146,25 +78,6 @@ const AddGroupTransaction = ({
           <option value="EXPENSE">Wydatek</option>
           <option value="INCOME">Przychód</option>
         </select>
-        <fieldset className={styles.participants}>
-          <legend>Uczestnicy transakcji</legend>
-          {members.map((member) => {
-            const inputId = `participant-${member.id}`;
-            return (
-              <label key={member.id} htmlFor={inputId} className={styles.participantOption}>
-                <input
-                  id={inputId}
-                  type="checkbox"
-                  checked={effectiveSelectedUserIds.some(
-                    (id) => String(id) === String(member.userId)
-                  )}
-                  onChange={() => toggleUserSelection(member.userId)}
-                />
-                <span>{member.userEmail}</span>
-              </label>
-            );
-          })}
-        </fieldset>
         <button type="submit" className={styles.button}>
           Dodaj
         </button>
