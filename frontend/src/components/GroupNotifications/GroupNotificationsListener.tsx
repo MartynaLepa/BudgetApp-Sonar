@@ -14,7 +14,7 @@ interface GroupNotification {
 }
 
 const getWebSocketUrl = (token: string) => {
-  const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+  const protocol = globalThis.location.protocol === "https:" ? "wss" : "ws";
   return `${protocol}://localhost:8080/ws/group-notifications?token=${encodeURIComponent(token)}`;
 };
 
@@ -23,7 +23,6 @@ const GroupNotificationsListener = () => {
 
   useEffect(() => {
     if (!isAuthenticated) return;
-
     const token = localStorage.getItem("accessToken");
     if (!token) return;
 
