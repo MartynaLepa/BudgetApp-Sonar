@@ -12,7 +12,10 @@ const GroupDebtsPage = () => {
   const [ownerId, setOwnerId] = useState<Id | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [debtToDelete, setDebtToDelete] = useState<GroupDebt | null>(null);
-  const currentUserId = user?.id !== undefined ? String(user.id) : "";
+  
+  // Naprawiono: Zmieniono z !== undefined na === undefined i zamieniono wartości miejscami,
+  // lub prościej: sprawdzamy bezpośrednio czy user.id istnieje (warunek twierdzący).
+  const currentUserId = user?.id ? String(user.id) : "";
 
   const getErrorMessage = (error: unknown, fallback: string) => {
     if (error instanceof Error && error.message.trim()) {
