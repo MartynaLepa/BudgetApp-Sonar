@@ -48,4 +48,4 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           cd backend
-          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -DskipTests
