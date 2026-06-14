@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import org.springframework.stereotype.Component;
 
-import pk.rd.pasir_drozd_roksana.model.User;
+import pk.lm.pasir_lepa_martyna.model.User;
  
 import javax.crypto.SecretKey;
 
