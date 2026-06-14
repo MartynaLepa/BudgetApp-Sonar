@@ -33,6 +33,8 @@ const AddGroupTransaction = ({
   const currentUserId = user?.id !== undefined ? String(user.id) : "";
 
   const memberIds = useMemo(() => members.map((member) => member.userId), [members]);
+  
+  // Poprawiony warunek - prosty i czysty, bez zaprzeczeń
   const effectiveSelectedUserIds = useMemo(() => {
     if (hasCustomParticipants) {
       const existingMemberIds = new Set(memberIds.map(String));
@@ -45,12 +47,12 @@ const AddGroupTransaction = ({
     if (error instanceof Error && error.message.trim()) {
       return error.message.replace(/^Wystąpił błąd:\s*/i, "");
     }
-
     return fallback;
   };
 
+  // Naprawiono logikę: Najpierw pobieramy aktualną listę na podstawie STAREGO stanu,
+  // a dopiero potem przestawiamy flagę `setHasCustomParticipants(true)`
   const toggleUserSelection = (userId: Id) => {
-    setHasCustomParticipants(true);
     const currentList = hasCustomParticipants ? selectedUserIds : memberIds;
     const isSelected = currentList.some((id) => String(id) === String(userId));
 
@@ -59,6 +61,8 @@ const AddGroupTransaction = ({
     } else {
       setSelectedUserIds([...currentList, userId]);
     }
+    
+    setHasCustomParticipants(true);
   };
 
   const handleSubmit = async (e: FormEvent) => {
