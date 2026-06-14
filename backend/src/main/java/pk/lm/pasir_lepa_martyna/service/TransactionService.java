@@ -84,3 +84,32 @@ public class TransactionService {
         Transaction transaction = transactionRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(
                         TRANSACTION_NOT_FOUND + id));
+        if (!transaction.getUser().getEmail().equals(getCurrentUser().getEmail())) {
+            throw new AccessDeniedException("Nie masz dostępu do tej transakcji");
+        }
+        transactionRepository.delete(transaction);
+    }
+
+    public BalanceDTO getUserBalance(User user, Float days) {
+        List<Transaction> userTransactions;
+        if (days != null) {
+            LocalDateTime from = LocalDateTime.now(ZoneId.systemDefault()).minusDays(days.longValue());
+            userTransactions = transactionRepository
+                    .findAllByUserAndTimestampGreaterThanEqual(user, from);
+        } else {
+            userTransactions = transactionRepository.findByUser(user);
+        }
+
+        double income = userTransactions.stream()
+                .filter(t -> t.getType() == TransactionType.INCOME)
+                .mapToDouble(Transaction::getAmount)
+                .sum();
+
+        double expense = userTransactions.stream()
+                .filter(t -> t.getType() == TransactionType.EXPENSE)
+                .mapToDouble(Transaction::getAmount)
+                .sum();
+
+        return new BalanceDTO(income, expense, income - expense);
+    }
+}
