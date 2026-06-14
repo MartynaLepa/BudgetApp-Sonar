@@ -28,8 +28,6 @@ const ConfirmModal = ({
       aria-modal="true"
       aria-labelledby="confirm-modal-title"
       open
-      onClick={(e) => e.stopPropagation()}
-      onKeyDown={(e) => e.stopPropagation()}
     >
       <div className={styles.modal}>
         <h3 id="confirm-modal-title">{title}</h3>
