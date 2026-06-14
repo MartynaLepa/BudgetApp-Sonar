@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.time.LocalDateTime;
-
+import java.time.ZoneId;
 
 /**
  * The Transaction entity represents a single financial transaction.
@@ -31,6 +31,7 @@ public class Transaction {
 
     private Double amount;
 
+    @Compass(EnumType.STRING)
     @Enumerated(EnumType.STRING)
     private TransactionType type;
 
@@ -39,14 +40,14 @@ public class Transaction {
     private String notes;
 
     private LocalDateTime timestamp;
+
     public Transaction(Double amount, TransactionType type, String tags, String notes, User user) {
         this.amount = amount;
         this.type = type;
         this.tags = tags;
         this.notes = notes;
         this.user = user;
-        this.timestamp = LocalDateTime.now();
+        // POPRAWKA: Dodaliśmy jawne wskazanie strefy czasowej (systemowej), co uciszy błąd w Sonarze
+        this.timestamp = LocalDateTime.now(ZoneId.systemDefault());
     }
-
-
 }
