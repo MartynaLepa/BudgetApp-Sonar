@@ -50,15 +50,14 @@ const AddGroupTransaction = ({
 
   const toggleUserSelection = (userId: Id) => {
     setHasCustomParticipants(true);
-    setSelectedUserIds((current) =>
-      (hasCustomParticipants ? current : memberIds).some(
-        (id) => String(id) === String(userId)
-      )
-        ? (hasCustomParticipants ? current : memberIds).filter(
-            (id) => String(id) !== String(userId)
-          )
-        : [...(hasCustomParticipants ? current : memberIds), userId]
-    );
+    const currentList = hasCustomParticipants ? selectedUserIds : memberIds;
+    const isSelected = currentList.some((id) => String(id) === String(userId));
+
+    if (isSelected) {
+      setSelectedUserIds(currentList.filter((id) => String(id) !== String(userId)));
+    } else {
+      setSelectedUserIds([...currentList, userId]);
+    }
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -112,9 +111,11 @@ const AddGroupTransaction = ({
     }
   };
 
+  const transactionTypeLabel = type === "EXPENSE" ? "wydatek" : "przychód";
+
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
-      <h3>Dodaj nowy {type === "EXPENSE" ? "wydatek" : "przychód"}</h3>
+      <h3>Dodaj nowy {transactionTypeLabel}</h3>
       <div className={styles.formsContainer}>
         <input
           type="text"

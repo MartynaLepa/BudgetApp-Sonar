@@ -238,6 +238,12 @@ const GroupMembersPage = ({ group, onBack }: Props) => {
     return "Nieopłacony";
   };
 
+  const getDebtStatusClass = (debt: GroupDebt): string => {
+    if (debt.confirmedByCreditor) return styles.statusPaid;
+    if (debt.paidByDebtor) return styles.statusPending;
+    return styles.statusOpen;
+  };
+
   const handleMarkDebtAsPaid = async (debtId: number | string) => {
     try {
       setErrorMessage("");
@@ -272,13 +278,7 @@ const GroupMembersPage = ({ group, onBack }: Props) => {
       <h2>Członkowie grupy: {group.name}</h2>
 
       {errorMessage && <p className={styles.errorMessage}>{errorMessage}</p>}
-      {!isGroupOwner && (
-        <p className={styles.infoMessage}>
-          Tylko właściciel grupy może dodawać i usuwać członków.
-        </p>
-      )}
-
-      {isGroupOwner && (
+      {isGroupOwner ? (
         <>
           <div className={styles.form}>
             <input
@@ -293,6 +293,10 @@ const GroupMembersPage = ({ group, onBack }: Props) => {
             <p className={styles.errorMessage}>{addMemberError}</p>
           )}
         </>
+      ) : (
+        <p className={styles.infoMessage}>
+          Tylko właściciel grupy może dodawać i usuwać członków.
+        </p>
       )}
 
       <AddGroupTransaction
@@ -388,15 +392,7 @@ const GroupMembersPage = ({ group, onBack }: Props) => {
                   {debt.creditor.email}
                 </strong>{" "}
                 {debt.amount.toFixed(2)} zł za <strong>{debt.title}</strong>
-                <span
-                  className={`${styles.statusBadge} ${
-                    debt.confirmedByCreditor
-                      ? styles.statusPaid
-                      : debt.paidByDebtor
-                        ? styles.statusPending
-                        : styles.statusOpen
-                  }`}
-                >
+                <span className={`${styles.statusBadge} ${getDebtStatusClass(debt)}`}>
                   {getDebtStatusLabel(debt)}
                 </span>
                 {canMarkDebtAsPaid(debt) && (
