@@ -34,10 +34,11 @@ const AddGroupTransaction = ({
 
   const memberIds = useMemo(() => members.map((member) => member.userId), [members]);
   const effectiveSelectedUserIds = useMemo(() => {
-    if (!hasCustomParticipants) return memberIds;
-
-    const existingMemberIds = new Set(memberIds.map(String));
-    return selectedUserIds.filter((id) => existingMemberIds.has(String(id)));
+    if (hasCustomParticipants) {
+      const existingMemberIds = new Set(memberIds.map(String));
+      return selectedUserIds.filter((id) => existingMemberIds.has(String(id)));
+    }
+    return memberIds;
   }, [hasCustomParticipants, memberIds, selectedUserIds]);
 
   const getErrorMessage = (error: unknown, fallback: string) => {
@@ -143,18 +144,22 @@ const AddGroupTransaction = ({
         </select>
         <fieldset className={styles.participants}>
           <legend>Uczestnicy transakcji</legend>
-          {members.map((member) => (
-            <label key={member.id} className={styles.participantOption}>
-              <input
-                type="checkbox"
-                checked={effectiveSelectedUserIds.some(
-                  (id) => String(id) === String(member.userId)
-                )}
-                onChange={() => toggleUserSelection(member.userId)}
-              />
-              <span>{member.userEmail}</span>
-            </label>
-          ))}
+          {members.map((member) => {
+            const inputId = `participant-${member.id}`;
+            return (
+              <label key={member.id} htmlFor={inputId} className={styles.participantOption}>
+                <input
+                  id={inputId}
+                  type="checkbox"
+                  checked={effectiveSelectedUserIds.some(
+                    (id) => String(id) === String(member.userId)
+                  )}
+                  onChange={() => toggleUserSelection(member.userId)}
+                />
+                <span>{member.userEmail}</span>
+              </label>
+            );
+          })}
         </fieldset>
         <button type="submit" className={styles.button}>
           Dodaj

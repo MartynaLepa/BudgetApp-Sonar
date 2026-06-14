@@ -65,10 +65,7 @@ const GroupMembersPage = ({ group, onBack }: Props) => {
         const membersData = membersResult.value;
         setMembers(membersData);
 
-        if (membersData.length === 0) {
-          setDebtorId("");
-          setCreditorId("");
-        } else {
+        if (membersData.length > 0) {
           setDebtorId((current) =>
             membersData.some((member) => String(member.userId) === current)
               ? current
@@ -79,6 +76,9 @@ const GroupMembersPage = ({ group, onBack }: Props) => {
               ? current
               : String(membersData[0].userId)
           );
+        } else {
+          setDebtorId("");
+          setCreditorId("");
         }
       } else {
         console.error("Błąd pobierania członków grupy:", membersResult.reason);

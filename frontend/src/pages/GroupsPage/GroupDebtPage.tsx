@@ -41,11 +41,11 @@ const GroupDebtsPage = () => {
   const refreshDebts = useCallback(async () => {
     try {
       const data = await fetchDebtsData();
-      if (!data) return;
-
-      setErrorMessage("");
-      setDebts(data.debtsData);
-      setOwnerId(data.ownerId);
+      if (data) {
+        setErrorMessage("");
+        setDebts(data.debtsData);
+        setOwnerId(data.ownerId);
+      }
     } catch (error: unknown) {
       console.error("Błąd pobierania długów:", error);
       setDebts([]);
@@ -58,10 +58,11 @@ const GroupDebtsPage = () => {
 
     fetchDebtsData()
       .then((data) => {
-        if (ignore || !data) return;
-        setErrorMessage("");
-        setDebts(data.debtsData);
-        setOwnerId(data.ownerId);
+        if (!ignore && data) {
+          setErrorMessage("");
+          setDebts(data.debtsData);
+          setOwnerId(data.ownerId);
+        }
       })
       .catch((error: unknown) => {
         if (ignore) return;
